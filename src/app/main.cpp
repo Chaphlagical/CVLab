@@ -9,6 +9,7 @@
 
 #include <string>
 #include <iostream>
+#include "ui.h"
 
 // About Desktop OpenGL function loaders:
 //  Modern desktop OpenGL doesn't have a standard portable header file to load OpenGL function pointers.
@@ -50,7 +51,7 @@ static void set_font()
 
     ImGuiIO& io = ImGui::GetIO();
     io.Fonts->AddFontDefault();
-    ImFont* font = io.Fonts->AddFontFromFileTTF("../data/fonts/Roboto-Medium.ttf", 25.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
+    ImFont* font = io.Fonts->AddFontFromFileTTF("c:/windows/fonts/simhei.ttf", 25.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
     IM_ASSERT(font != NULL);
     ImGui::GetIO().FontDefault = font;
 }
@@ -80,7 +81,7 @@ int main(int, char**)
 #endif
 
     // Create window with graphics context
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "Photo Wake Up! Demo", NULL, NULL);
     if (window == NULL)
         return 1;
     glfwMakeContextCurrent(window);
@@ -156,19 +157,16 @@ int main(int, char**)
         ImGui::NewFrame();
 
         ////////////////////////////////////////////////////////////////
-        char* buf=new char[3];
-        float f = 0;
-        ImGui::Text("Hello, world %d", 123);
-        if (ImGui::Button("Save"))
-            std::cout << "a" << std::endl;
-        ImGui::InputText("string", buf, IM_ARRAYSIZE(buf));
-        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-
+        bool p_open = true;
+        Chaf::CUI ui("App");
+        bool my_tool_active = true;
+        float* my_color = new float;
+        ui.ShowUI(&p_open);
 
         //////////////////////////////////////////////////////////////
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-        if (show_demo_window)
+       /*if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
@@ -202,13 +200,14 @@ int main(int, char**)
             if (ImGui::Button("Close Me"))
                 show_another_window = false;
             ImGui::End();
-        }
+        }*/
 
         // Rendering
         ImGui::Render();
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
+        clear_color = ui.GetColor();
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

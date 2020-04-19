@@ -1,60 +1,171 @@
-#if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
-#define _CRT_SECURE_NO_WARNINGS
-#endif
+#include "ui.h"
+#include "fasterrcnn.h"
 
-#include "imgui.h"
-#ifndef IMGUI_DISABLE
 
-#include <ctype.h>          // toupper
-#include <limits.h>         // INT_MIN, INT_MAX
-#include <math.h>           // sqrtf, powf, cosf, sinf, floorf, ceilf
-#include <stdio.h>          // vsnprintf, sscanf, printf
-#include <stdlib.h>         // NULL, malloc, free, atoi
-#if defined(_MSC_VER) && _MSC_VER <= 1500 // MSVC 2008 or earlier
-#include <stddef.h>         // intptr_t
-#else
-#include <stdint.h>         // intptr_t
-#endif
+using namespace Chaf;
 
-#ifdef _MSC_VER
-#pragma warning (disable: 4996) // 'This function or variable may be unsafe': strcpy, strdup, sprintf, vsnprintf, sscanf, fopen
-#endif
-#if defined(__clang__)
-#pragma clang diagnostic ignored "-Wold-style-cast"             // warning : use of old-style cast                              // yes, they are more terse.
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"    // warning : 'xx' is deprecated: The POSIX name for this item.. // for strdup used in demo code (so user can copy & paste the code)
-#pragma clang diagnostic ignored "-Wint-to-void-pointer-cast"   // warning : cast to 'void *' from smaller integer type 'int'
-#pragma clang diagnostic ignored "-Wformat-security"            // warning : warning: format string is not a string literal
-#pragma clang diagnostic ignored "-Wexit-time-destructors"      // warning : declaration requires an exit-time destructor       // exit-time destruction order is undefined. if MemFree() leads to users code that has been disabled before exit it might cause problems. ImGui coding style welcomes static/globals.
-#pragma clang diagnostic ignored "-Wunused-macros"              // warning : warning: macro is not used                         // we define snprintf/vsnprintf on Windows so they are available, but not always used.
-#if __has_warning("-Wzero-as-null-pointer-constant")
-#pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"  // warning : zero as null pointer constant                  // some standard header variations use #define NULL 0
-#endif
-#if __has_warning("-Wdouble-promotion")
-#pragma clang diagnostic ignored "-Wdouble-promotion"           // warning: implicit conversion from 'float' to 'double' when passing argument to function  // using printf() is a misery with this as C++ va_arg ellipsis changes float to double.
-#endif
-#if __has_warning("-Wreserved-id-macro")
-#pragma clang diagnostic ignored "-Wreserved-id-macro"          // warning : macro name is a reserved identifier                //
-#endif
-#elif defined(__GNUC__)
-#pragma GCC diagnostic ignored "-Wpragmas"                      // warning: unknown option after '#pragma GCC diagnostic' kind
-#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"          // warning: cast to pointer from integer of different size
-#pragma GCC diagnostic ignored "-Wformat-security"              // warning : format string is not a string literal (potentially insecure)
-#pragma GCC diagnostic ignored "-Wdouble-promotion"             // warning: implicit conversion from 'float' to 'double' when passing argument to function
-#pragma GCC diagnostic ignored "-Wconversion"                   // warning: conversion to 'xxxx' from 'xxxx' may alter its value
-#pragma GCC diagnostic ignored "-Wmisleading-indentation"       // [__GNUC__ >= 6] warning: this 'if' clause does not guard this statement      // GCC 6.0+ only. See #883 on GitHub.
-#endif
+CUI::CUI()
+{
+    w_name = "Demo";
+    Init();
+}
 
-// Play it nice with Windows users (Update: since 2018-05, Notepad finally appears to support Unix-style carriage returns!)
-#ifdef _WIN32
-#define IM_NEWLINE  "\r\n"
-#else
-#define IM_NEWLINE  "\n"
-#endif
+CUI::CUI(std::string name)
+{
+    w_name = name;
+    Init();
+}
 
-#if defined(_MSC_VER) && !defined(snprintf)
-#define snprintf    _snprintf
-#endif
-#if defined(_MSC_VER) && !defined(vsnprintf)
-#define vsnprintf   _vsnprintf
-#endif
+void CUI::Init()
+{
+    no_titlebar = false;
+    no_scrollbar = false;
+    no_menu = false;
+    no_move = false;
+    no_resize = false;
+    no_collapse = false;
+    no_close = false;
+    no_nav = false;
+    no_background = false;
+    no_bring_to_front = false;
 
+    if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
+    if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
+    if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
+    if (no_move)            window_flags |= ImGuiWindowFlags_NoMove;
+    if (no_resize)          window_flags |= ImGuiWindowFlags_NoResize;
+    if (no_collapse)        window_flags |= ImGuiWindowFlags_NoCollapse;
+    if (no_nav)             window_flags |= ImGuiWindowFlags_NoNav;
+    if (no_background)      window_flags |= ImGuiWindowFlags_NoBackground;
+    if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+    if (no_close)           p_open = NULL; // Don't pass our bool* to Begin
+
+    clear_color[0] = 0.45;
+    clear_color[1] = 0.55;
+    clear_color[2] = 0.60;
+    clear_color[3] = 1.00;
+
+    yolo_detection.Load_Model();
+}
+
+ImVec4 CUI::GetColor()
+{
+    return ImVec4(clear_color[0], clear_color[1], clear_color[2], clear_color[3]);
+}
+
+void CUI::ShowUI(bool* p_open_flag)
+{
+    IM_ASSERT(ImGui::GetCurrentContext() != NULL && "Missing dear imgui context. Refer to examples app!"); // Exceptionally add an extra assert here for people confused with initial dear imgui setup
+    p_open = p_open_flag;
+    //TODO:: show main UI
+    ImGui::SetNextWindowPos(ImVec2(50, 50), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(400, 500), ImGuiCond_FirstUseEver);
+
+    ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
+
+    //AddMainMenuBar();
+    if (!ImGui::Begin(w_name.c_str(), p_open, window_flags))
+    {
+        // Early out if the window is collapsed, as an optimization.
+        ImGui::End();
+        return;
+    }
+    AddMenuBar();
+    
+    if (ImGui::Button("yolo"))
+    {
+        Chaf::CFasterRCNN rcnn;
+        //rcnn.Load_Model();
+        //rcnn.Load_Image("../data/images/wolverine.jpg");
+        //rcnn.Detection();
+        CYolo yolo;
+        yolo.Load_Model();
+        yolo.Load_Image("../data/images/wolverine.jpg");
+        yolo.Process();
+    }
+
+    
+    ImGui::End();
+}
+
+void CUI::OpenImageFIleDialog()
+{
+    ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose File", ".*\0.png\0.jpg\0.bmp\0.jpeg\0\0", ".");
+}
+
+void CUI::DisplayImageFIleDialog()
+{
+    // display
+    if (ImGuiFileDialog::Instance()->FileDialog("ChooseFileDlgKey"))
+    {
+        // action if OK
+        if (ImGuiFileDialog::Instance()->IsOk == true)
+        {
+            choose_file_name = ImGuiFileDialog::Instance()->GetFilepathName();
+            choose_file_path = ImGuiFileDialog::Instance()->GetCurrentPath();
+            // action
+        }
+        // close
+        ImGuiFileDialog::Instance()->CloseDialog("ChooseFileDlgKey");
+    }
+}
+
+void CUI::AddMainMenuBar()
+{
+    if (ImGui::BeginMainMenuBar())
+    {
+        if (ImGui::BeginMenu("File"))
+        {
+            AddMenuFile();
+            ImGui::EndMenu();
+        }
+        ImGui::EndMainMenuBar();
+    }
+    DisplayImageFIleDialog();
+}
+#include <iostream>
+void CUI::AddMenuBar()
+{
+    if (ImGui::BeginMenuBar())
+    {
+        if (ImGui::BeginMenu("File"))
+        {
+            AddMenuFile();
+            ImGui::EndMenu();
+        }
+        ImGui::EndMenuBar();
+    }
+    DisplayImageFIleDialog();
+}
+
+void CUI::AddMenuFile()
+{
+    //ImGui::MenuItem("(dummy menu)", NULL, false, false);
+
+    if (ImGui::MenuItem("Open", "Ctrl+O")) 
+    {
+        OpenImageFIleDialog();
+    }
+
+    /*if (ImGui::BeginMenu("Open Recent"))
+    {
+    }*/
+    if (ImGui::MenuItem("Save", "Ctrl+S")) {}
+    if (ImGui::MenuItem("Save As..")) {}
+    ImGui::Separator();
+
+    if (ImGui::BeginMenu("Color Setting"))
+    {
+        ImGui::ColorEdit4("Color", clear_color);
+        ImGui::EndMenu();
+    }
+}
+
+void CUI::DisplayImage()
+{
+    ImGui::Begin("OpenGL Texture Text");
+    ImGui::Text("pointer = %p", my_image_texture);
+    ImGui::Text("size = %d x %d", my_image_width, my_image_height);
+    ImGui::Image((void*)(intptr_t)my_image_texture, ImVec2(my_image_width, my_image_height));
+    ImGui::End();
+}
