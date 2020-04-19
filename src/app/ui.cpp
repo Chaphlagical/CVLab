@@ -62,8 +62,6 @@ void CUI::ShowUI(bool* p_open_flag)
     ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
 
     AddMainMenuBar();
-
-    CImg.Load_Image("D:/test.jpg", "scientist");
     DisplayImage();
            
 }
@@ -81,10 +79,10 @@ void CUI::DisplayImageFIleDialog()
         // action if OK
         if (ImGuiFileDialog::Instance()->IsOk == true)
         {
-            std::string choose_file_path = ImGuiFileDialog::Instance()->GetCurrentPath()+"/"+ImGuiFileDialog::Instance()->GetCurrentFileName();
-            CImg.Load_Image(choose_file_path);
-            // action
-            std::cout << choose_file_path << std::endl;
+            std::string path = ImGuiFileDialog::Instance()->GetCurrentPath()+"/"+ImGuiFileDialog::Instance()->GetCurrentFileName();
+            std::string name= ImGuiFileDialog::Instance()->GetCurrentFileName();
+            std::cout << path;
+            AddImage(path, name);
         }
         // close
         ImGuiFileDialog::Instance()->CloseDialog("ChooseFileDlgKey");
@@ -103,6 +101,15 @@ void CUI::AddMainMenuBar()
             AddMenuFile();
             ImGui::EndMenu();
         }
+        if (ImGui::BeginMenu("Load"))
+        {
+            if (ImGui::MenuItem("Load Yolo Model"))
+            {
+                if (!yolo_detection.IsModelLoad())
+                    yolo_detection.Load_Model();
+            }
+            ImGui::EndMenu();
+        }
         ImGui::EndMainMenuBar();
     }
     DisplayImageFIleDialog();
@@ -117,6 +124,17 @@ void CUI::AddMenuBar()
             AddMenuFile();
             ImGui::EndMenu();
         }
+        
+        if (ImGui::BeginMenu("Load"))
+        {
+            if (ImGui::MenuItem("Load Yolo Model"))
+            {
+                if (!yolo_detection.IsModelLoad())
+                    yolo_detection.Load_Model();
+            }
+            ImGui::EndMenu();
+        }
+
         ImGui::EndMenuBar();
     }
     DisplayImageFIleDialog();
@@ -129,6 +147,7 @@ void CUI::AddMenuFile()
     if (ImGui::MenuItem("Open", "Ctrl+O")) 
     {
         OpenImageFIleDialog();
+
     }
 
     /*if (ImGui::BeginMenu("Open Recent"))
@@ -147,28 +166,52 @@ void CUI::AddMenuFile()
 
 void CUI::DisplayImage()
 {
-    for (size_t i = 0; i < CImg_flag_list.size(); i++)
-    {
-        if (CImg_flag_list[i])
-        {
-            bool flag = CImg_flag_list[i];
-            ImGui::Begin(CImg_list[i].name().c_str(), &flag);
-            CImg_flag_list[i] = flag;
-            ImGui::Image((void*)(intptr_t)CImg_list[i].texture(), ImVec2(CImg_list[i].width(), CImg_list[i].height()));
-            ImGui::End();
-        }
-    }
     auto flag_iter = CImg_flag_list.begin();
     auto cimg_iter = CImg_list.begin();
-    size_t idx = 0;
     while (flag_iter != CImg_flag_list.end() && cimg_iter != CImg_list.end())
     {
         bool flag = *flag_iter;
-        ImGui::Begin(CImg_list[i].name().c_str(), &flag);
-        CImg_flag_list[idx] = flag;
-        ImGui::Image((void*)(intptr_t)(*cimg_iter).texture(), ImVec2((*cimg_iter).width(), (*cimg_iter).height()));
-        ImGui::End();
-        idx++;
+        if (flag)
+        {
+            ImGui::Begin((*cimg_iter).name().c_str(), &flag);
+            ImageTool(*cimg_iter);
+            const auto flag_iter_temp = flag_iter;
+            *flag_iter_temp = flag;
+            ImGui::Image((void*)(intptr_t)(*cimg_iter).texture(), ImVec2((*cimg_iter).width(), (*cimg_iter).height()));
+            ImGui::End();
+            flag_iter++; cimg_iter++;
+        }
+        else
+        {
+            flag_iter = CImg_flag_list.erase(flag_iter);
+            cimg_iter = CImg_list.erase(cimg_iter);
+        }
     }
 
+}
+
+void CUI::AddImage(const std::string path, const std::string name)
+{
+    CImage cimg;
+    if (cimg.Load_Image(path, name))
+    {
+        bool flag = true;
+        CImg_flag_list.push_back(flag);
+        CImg_list.push_back(cimg);
+    }
+}
+
+void CUI::ImageTool(CImage& cimg)
+{
+    if (ImGui::Button("Object Detection"))
+    {
+        if (!yolo_detection.IsModelLoad())
+            yolo_detection.Load_Model();
+        yolo_detection.Detection(cimg.input_img, cimg.output_img);
+        if (yolo_detection.Get_Result(cimg.res_boxes, cimg.res_classes))
+        {
+            cimg.Set_DisplayImage(cimg.output_img);
+            std::cout << "aa" << std::endl;
+        }
+    }
 }

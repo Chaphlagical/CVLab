@@ -15,7 +15,8 @@ CImage::CImage()
 
 void CImage::Init()
 {
-	
+    display_img = new cv::Mat;
+    display_img = NULL;
 	img_path = "";
 }
 
@@ -40,47 +41,10 @@ unsigned char* CImage::Mat_to_Byte(const cv::Mat img)
     return ptr;
 }
 
-bool CImage::LoadTextureFromFile(const char* filename, GLuint* out_texture)
+bool CImage::LoadTexture(GLuint* out_texture)
 {
     // Load from file
-    unsigned char* image_data = Mat_to_Byte(img);
-
-    /*size_t bia = 0;
-    for (size_t i = 0; i < img.rows; i++)
-    {
-        for (size_t j = 0; j < img.cols; j++)
-        {
-            std::cout << "(";
-            for (int k = 3; k >= 0; k--)
-            {
-                //*pt = img.at<cv::Vec3b>(i, j)[k];
-                std::cout << int(*(image_data + bia)) << " ";
-                bia++;
-            }
-            std::cout << ") ";
-        }
-        std::cout << std::endl;
-    }
-    std::cout << std::endl << std::endl;
-    bia = 0;
-    for (size_t i = 0; i < img.rows; i++)
-    {
-        for (size_t j = 0; j < img.cols; j++)
-        {
-            std::cout << "(";
-            for (int k = 2; k >= 0; k--)
-            {
-                //*pt = img.at<cv::Vec3b>(i, j)[k];
-                std::cout << int(*(image_dat + bia)) << "|";
-                bia++;
-            }
-            std::cout << ") ";
-        }
-        std::cout << std::endl;
-    }
-    
-    std::cout << std::endl << std::endl << "-----------------------------------------------------------------------------------------------------------------------------------------------" << std::endl << std::endl;
-    */
+    unsigned char* image_data = Mat_to_Byte(*display_img);
 
     if (image_data == NULL)
         return false;
@@ -96,7 +60,7 @@ bool CImage::LoadTextureFromFile(const char* filename, GLuint* out_texture)
 
     // Upload pixels into texture
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.cols, img.rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (*display_img).cols, (*display_img).rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
     stbi_image_free(image_data);
 
     *out_texture = image_texture;
@@ -104,25 +68,27 @@ bool CImage::LoadTextureFromFile(const char* filename, GLuint* out_texture)
     return true;
 }
 
-void CImage::Load_Image(const std::string path, const std::string name)
+bool CImage::Load_Image(const std::string path, const std::string name)
 {
 	img_path = path;
     img_name = name;
-    img = cv::imread(path);
-    img_width = img.cols;
-    img_height = img.rows;
-	bool ret = LoadTextureFromFile(img_path.c_str(), &img_gui_texture);
-    if(!ret)    
-       std::cout << "Image Loading Failed!--"+img_path << std::endl;
+    input_img = cv::imread(path);
+    display_img = &input_img;
+    img_width = input_img.cols;
+    img_height = input_img.rows;
+	bool ret = LoadTexture(&img_gui_texture);
+    if (!ret)
+        return false;
+    return true;
 }
 
-void CImage::Object_Detection()
+/*void CImage::Object_Detection()
 {
     yolo_detection.Load_Model();
     std::cout << "Load Model Complete" << std::endl;
 	yolo_detection.Load_Image(img_path);
 	yolo_detection.Process(false);
-}
+}*/
 
 int CImage::width()
 {
@@ -142,4 +108,10 @@ int CImage::texture()
 std::string CImage::name()
 {
     return img_name;
+}
+
+void CImage::Set_DisplayImage(cv::Mat img)
+{
+    display_img = &img;
+    LoadTexture(&img_gui_texture);
 }

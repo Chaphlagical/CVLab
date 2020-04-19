@@ -38,15 +38,11 @@ void CYolo::Load_Model()
 	yolo_net = cv::dnn::readNetFromDarknet(model_cfg_path, weight_path);
 	yolo_net.setPreferableBackend(cv::dnn::DNN_BACKEND_OPENCV);
 	yolo_net.setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
+
+	is_model_load = true;
 }
 
-void	CYolo::Load_Image(const std::string img_path)
-{
-	input_img = cv::imread(img_path);
-	output_img = input_img.clone();
-}
-
-void CYolo::Process(bool display)
+void CYolo::Detection(cv::Mat input_img)
 {
 	if (input_img.empty())
 	{
@@ -61,9 +57,25 @@ void CYolo::Process(bool display)
 
 	yolo_net.forward(outs, Get_Output_Name());
 
-	postprocess();
-	if(display)
-		cv::imshow("display", input_img);
+	postprocess(input_img);
+}
+
+void CYolo::Detection(cv::Mat input_img, cv::Mat& output_img)
+{
+	if (input_img.empty())
+	{
+		std::cout << "No image input!" << std::endl;
+		return;
+	}
+
+	static cv::Mat blob;
+	cv::dnn::blobFromImage(input_img, blob, 1.0, cv::Size(inpWidth, inpHeight), cv::Scalar(0, 0, 0), true, false, CV_8U);
+
+	yolo_net.setInput(blob, "", 0.00392, cv::Scalar{ 0,0,0 });
+
+	yolo_net.forward(outs, Get_Output_Name());
+
+	postprocess(input_img, output_img);
 }
 
 std::vector<std::string> CYolo::Get_Output_Name()
@@ -82,7 +94,55 @@ std::vector<std::string> CYolo::Get_Output_Name()
 	return names;
 }
 
-void CYolo::postprocess()
+void CYolo::postprocess(cv::Mat input_img)
+{
+	std::vector<int> classIds;
+	std::vector<float> confidences;
+	std::vector<cv::Rect> boxes;
+	for (size_t i = 0; i < outs.size(); i++) {
+		float* data = (float*)outs[i].data;
+		for (int j = 0; j < outs[i].rows; ++j, data += outs[i].cols)
+		{
+			cv::Mat scores = outs[i].row(j).colRange(5, outs[i].cols);
+			cv::Point classIdPoint;
+			double confidence;
+			minMaxLoc(scores, 0, &confidence, 0, &classIdPoint);
+			if (confidence > confThreshold)
+			{
+				int centerX = (int)(data[0] * input_img.cols);
+				int centerY = (int)(data[1] * input_img.rows);
+				int width = (int)(data[2] * input_img.cols);
+				int height = (int)(data[3] * input_img.rows);
+				int left = centerX - width / 2;
+				int top = centerY - height / 2;
+
+				classIds.push_back(classIdPoint.x);
+				confidences.push_back((float)confidence);
+				boxes.push_back(cv::Rect(left, top, width, height));
+			}
+		}
+	}
+
+	std::vector<int> indices;
+	cv::dnn::NMSBoxes(boxes, confidences, confThreshold, nmsThreshold, indices);
+
+	res_boxes.clear();
+	res_classes.clear();
+
+	for (size_t i = 0; i < indices.size(); i++) {
+		int idx = indices[i];
+		cv::Rect box = boxes[idx];
+		res_boxes.push_back(box);
+		std::string label = "";
+		if (!class_names.empty()) {
+			CV_Assert(classIds[idx] < (int)class_names.size());
+			label = class_names[classIds[idx]];
+		}
+		res_classes.push_back(label);
+	}
+}
+
+void CYolo::postprocess(cv::Mat input_img, cv::Mat& output_img)
 {
 	std::vector<int> classIds;
 	std::vector<float> confidences;
@@ -113,11 +173,24 @@ void CYolo::postprocess()
 	
 	std::vector<int> indices;
 	cv::dnn::NMSBoxes(boxes, confidences, confThreshold, nmsThreshold, indices);
+
+	res_boxes.clear();
+	res_classes.clear();
+	output_img = input_img.clone();
+
 	for (size_t i = 0; i < indices.size(); i++) {
 		int idx = indices[i];
 		cv::Rect box = boxes[idx];
 		drawPred(classIds[idx], confidences[idx], box.x, box.y,
 			box.x + box.width, box.y + box.height, output_img);
+		res_boxes.push_back(box);
+
+		std::string label = "";
+		if (!class_names.empty()) {
+			CV_Assert(classIds[idx] < (int)class_names.size());
+			label = class_names[classIds[idx]];
+		}
+		res_classes.push_back(label);
 	}
 }
 
@@ -137,4 +210,16 @@ void CYolo::drawPred(int classId, float conf, int left, int top, int right, int 
 	cv::putText(frame, label, cv::Point(left, top), cv::FONT_HERSHEY_SIMPLEX, 0.75, cv::Scalar(0, 0, 0), 1);
 }
 
+bool CYolo::Get_Result(std::vector<cv::Rect>& boxes, std::vector<std::string>& classes)
+{
+	if (res_boxes.empty() || res_classes.empty())
+		return false;
+	boxes = res_boxes;
+	classes = res_classes;
+	return true;
+}
 
+bool CYolo::IsModelLoad()
+{
+	return is_model_load;
+}

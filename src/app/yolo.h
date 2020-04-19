@@ -15,13 +15,16 @@ namespace Chaf
 
 	public:
 		void Load_Model();
-		void Load_Image(const std::string img_path);
-		void Process(bool display);
+		void Detection(cv::Mat input_img);
+		void Detection(cv::Mat input_img, cv::Mat& output_img);
+		bool Get_Result(std::vector<cv::Rect>& boxes, std::vector<std::string>& classes);
+		bool IsModelLoad();
 		
 	private:
 		void Init();
 		std::vector<std::string> Get_Output_Name();
-		void postprocess();
+		void postprocess(cv::Mat input_img);
+		void postprocess(cv::Mat input_img, cv::Mat& output_img);
 		void drawPred(int classId, float conf, int left, int top, int right, int bottom, cv::Mat& frame);
 
 	 private:
@@ -38,8 +41,10 @@ namespace Chaf
 		std::vector<cv::Mat> outs;
 
 		cv::dnn::Net yolo_net;
-		cv::Mat input_img;
-		cv::Mat output_img;
 
+		std::vector<cv::Rect> res_boxes;
+		std::vector<std::string> res_classes;
+
+		bool is_model_load = false;
 	};
 }
