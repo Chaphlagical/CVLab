@@ -140,6 +140,11 @@ int main(int, char**)
     bool show_demo_window = true;
     bool show_another_window = true;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    Chaf::CUI ui("App");
+            bool p_open = true;
+        bool my_tool_active = true;
+        float* my_color = new float;
+        ui.image_flag = true;
 
     // Main loop
     while (!glfwWindowShouldClose(window))
@@ -157,16 +162,13 @@ int main(int, char**)
         ImGui::NewFrame();
 
         ////////////////////////////////////////////////////////////////
-        bool p_open = true;
-        Chaf::CUI ui("App");
-        bool my_tool_active = true;
-        float* my_color = new float;
+
         ui.ShowUI(&p_open);
 
         //////////////////////////////////////////////////////////////
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-       /*if (show_demo_window)
+       if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
@@ -200,7 +202,7 @@ int main(int, char**)
             if (ImGui::Button("Close Me"))
                 show_another_window = false;
             ImGui::End();
-        }*/
+        }
 
         // Rendering
         ImGui::Render();

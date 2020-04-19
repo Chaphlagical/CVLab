@@ -61,7 +61,6 @@
 #endif
 
 #include "imgui/ImGuiFileDialog.h"
-#include"yolo.h"
 #include "image.h"
 
 namespace Chaf
@@ -76,26 +75,33 @@ namespace Chaf
 	public:
 		ImVec4 GetColor();
 
+	// UI Setting
 	private:
 		void OpenImageFIleDialog();
 		void DisplayImageFIleDialog();
 		void AddMainMenuBar();
 		void AddMenuFile();
 		void AddMenuBar();
-		void DisplayImage();
+		
 
 	private:
 		void Init();
+
+	// Image Setting
+	private:
+		std::vector<CImage> CImg_list;
+		std::vector<bool> CImg_flag_list;
+		void DisplayImage();
+		void UpdateImage();
+
 
 	private:
 		std::string w_name;
 		bool* p_open;
 		float clear_color[4];
-		std::string choose_file_path = "";
-		std::string choose_file_name = "";
 		
 	private:
-		Chaf::CYolo yolo_detection;
+		//CImage CImg;
 
 	private:
 		bool no_titlebar;
@@ -110,6 +116,7 @@ namespace Chaf
 		bool no_bring_to_front;
 
 		ImGuiWindowFlags window_flags = 0;
+
 
 	};
 }

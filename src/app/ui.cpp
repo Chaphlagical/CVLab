@@ -1,5 +1,4 @@
 #include "ui.h"
-#include "fasterrcnn.h"
 
 
 using namespace Chaf;
@@ -45,7 +44,6 @@ void CUI::Init()
     clear_color[2] = 0.60;
     clear_color[3] = 1.00;
 
-    yolo_detection.Load_Model();
 }
 
 ImVec4 CUI::GetColor()
@@ -63,34 +61,16 @@ void CUI::ShowUI(bool* p_open_flag)
 
     ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
 
-    //AddMainMenuBar();
-    if (!ImGui::Begin(w_name.c_str(), p_open, window_flags))
-    {
-        // Early out if the window is collapsed, as an optimization.
-        ImGui::End();
-        return;
-    }
-    AddMenuBar();
-    
-    if (ImGui::Button("yolo"))
-    {
-        Chaf::CFasterRCNN rcnn;
-        //rcnn.Load_Model();
-        //rcnn.Load_Image("../data/images/wolverine.jpg");
-        //rcnn.Detection();
-        CYolo yolo;
-        yolo.Load_Model();
-        yolo.Load_Image("../data/images/wolverine.jpg");
-        yolo.Process();
-    }
+    AddMainMenuBar();
 
-    
-    ImGui::End();
+    CImg.Load_Image("D:/test.jpg", "scientist");
+    DisplayImage();
+           
 }
 
 void CUI::OpenImageFIleDialog()
 {
-    ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose File", ".*\0.png\0.jpg\0.bmp\0.jpeg\0\0", ".");
+    ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose File", ".png\0.jpg\0.bmp\0.jpeg\0\0", ".");
 }
 
 void CUI::DisplayImageFIleDialog()
@@ -101,13 +81,17 @@ void CUI::DisplayImageFIleDialog()
         // action if OK
         if (ImGuiFileDialog::Instance()->IsOk == true)
         {
-            choose_file_name = ImGuiFileDialog::Instance()->GetFilepathName();
-            choose_file_path = ImGuiFileDialog::Instance()->GetCurrentPath();
+            std::string choose_file_path = ImGuiFileDialog::Instance()->GetCurrentPath()+"/"+ImGuiFileDialog::Instance()->GetCurrentFileName();
+            CImg.Load_Image(choose_file_path);
             // action
+            std::cout << choose_file_path << std::endl;
         }
         // close
         ImGuiFileDialog::Instance()->CloseDialog("ChooseFileDlgKey");
+        
+        //DisplayImage();
     }
+    
 }
 
 void CUI::AddMainMenuBar()
@@ -123,7 +107,7 @@ void CUI::AddMainMenuBar()
     }
     DisplayImageFIleDialog();
 }
-#include <iostream>
+
 void CUI::AddMenuBar()
 {
     if (ImGui::BeginMenuBar())
@@ -163,9 +147,28 @@ void CUI::AddMenuFile()
 
 void CUI::DisplayImage()
 {
-    ImGui::Begin("OpenGL Texture Text");
-    ImGui::Text("pointer = %p", my_image_texture);
-    ImGui::Text("size = %d x %d", my_image_width, my_image_height);
-    ImGui::Image((void*)(intptr_t)my_image_texture, ImVec2(my_image_width, my_image_height));
-    ImGui::End();
+    for (size_t i = 0; i < CImg_flag_list.size(); i++)
+    {
+        if (CImg_flag_list[i])
+        {
+            bool flag = CImg_flag_list[i];
+            ImGui::Begin(CImg_list[i].name().c_str(), &flag);
+            CImg_flag_list[i] = flag;
+            ImGui::Image((void*)(intptr_t)CImg_list[i].texture(), ImVec2(CImg_list[i].width(), CImg_list[i].height()));
+            ImGui::End();
+        }
+    }
+    auto flag_iter = CImg_flag_list.begin();
+    auto cimg_iter = CImg_list.begin();
+    size_t idx = 0;
+    while (flag_iter != CImg_flag_list.end() && cimg_iter != CImg_list.end())
+    {
+        bool flag = *flag_iter;
+        ImGui::Begin(CImg_list[i].name().c_str(), &flag);
+        CImg_flag_list[idx] = flag;
+        ImGui::Image((void*)(intptr_t)(*cimg_iter).texture(), ImVec2((*cimg_iter).width(), (*cimg_iter).height()));
+        ImGui::End();
+        idx++;
+    }
+
 }
