@@ -22,7 +22,7 @@ Paper [link](http://openaccess.thecvf.com/content_CVPR_2019/papers/Weng_Photo_Wa
 
 [coco.names](https://raw.githubusercontent.com/pjreddie/darknet/master/data/coco.names)
 
-[yolov3.cfg](https://github.com/pjreddie/darknet/blob/master/cfg/yolov3.cfg?raw=true -O ./yolov3.cfg)
+[yolov3.cfg](https://github.com/pjreddie/darknet/blob/master/cfg/yolov3.cfg?raw=true)
 
 [yolov3.weights](https://pjreddie.com/media/files/yolov3.weights)
 
