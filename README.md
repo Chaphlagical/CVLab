@@ -16,6 +16,18 @@ Paper [link](http://openaccess.thecvf.com/content_CVPR_2019/papers/Weng_Photo_Wa
 
 ## Introduction
 
+### Download Models
+
+#### yolov3
+
+[coco.names](https://raw.githubusercontent.com/pjreddie/darknet/master/data/coco.names)
+
+[yolov3.cfg]([https://github.com/pjreddie/darknet/blob/master/cfg/yolov3.cfg?raw=true%20-O%20./yolov3.cfg](https://github.com/pjreddie/darknet/blob/master/cfg/yolov3.cfg?raw=true -O ./yolov3.cfg))
+
+[yolov3.weights](https://pjreddie.com/media/files/yolov3.weights)
+
+Place them in ./data/models/yolov3
+
 ### Object Detection
 
 Using OpenCV + Yolo detect people
