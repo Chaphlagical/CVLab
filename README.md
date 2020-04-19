@@ -8,3 +8,16 @@ Paper [link](http://openaccess.thecvf.com/content_CVPR_2019/papers/Weng_Photo_Wa
 
 ## Requirements
 
+* C++ 11
+* CMake 3.16.3  
+* ImGUI
+* OpenCV 4.2.0
+* GLFW
+
+## Introduction
+
+### Object Detection
+
+Using OpenCV + Yolo detect people
+
+![image-20200419233642340](README.assets/image-20200419233642340.png)
