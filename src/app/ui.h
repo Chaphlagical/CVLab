@@ -63,6 +63,7 @@
 #include "imgui/ImGuiFileDialog.h"
 #include "image.h"
 #include "yolo.h"
+#include <Windows.h>
 
 namespace Chaf
 {
@@ -120,7 +121,6 @@ namespace Chaf
 		bool no_bring_to_front;
 
 		ImGuiWindowFlags window_flags = 0;
-
 
 	};
 }

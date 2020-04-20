@@ -16,11 +16,16 @@ namespace Chaf
 
 	public:
 		bool Load_Image(const std::string path, const std::string name="demo");
-		void Set_DisplayImage(cv::Mat img);
+		void Set_Display_Output();
+		void Set_DIsplay_Input();
+		void Reset_Image_Size();
+		void Set_Image_Size(const int width, const int height);
+		void Reset();
 
 	public:
 		cv::Mat input_img;
 		cv::Mat output_img;
+
 		std::vector<cv::Rect> res_boxes;
 		std::vector<std::string> res_classes;
 
@@ -38,7 +43,9 @@ namespace Chaf
 		std::string img_path;
 		std::string img_name;
 		GLuint img_gui_texture;
-		cv::Mat* display_img;
+
+		cv::Mat display_img;
+		
 		int img_width = 0;
 		int img_height = 0;
 

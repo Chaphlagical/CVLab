@@ -19,7 +19,7 @@ namespace Chaf
 		void Detection(cv::Mat input_img, cv::Mat& output_img);
 		bool Get_Result(std::vector<cv::Rect>& boxes, std::vector<std::string>& classes);
 		bool IsModelLoad();
-		
+
 	private:
 		void Init();
 		std::vector<std::string> Get_Output_Name();

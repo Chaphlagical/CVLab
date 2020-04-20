@@ -15,8 +15,6 @@ CImage::CImage()
 
 void CImage::Init()
 {
-    display_img = new cv::Mat;
-    display_img = NULL;
 	img_path = "";
 }
 
@@ -44,7 +42,7 @@ unsigned char* CImage::Mat_to_Byte(const cv::Mat img)
 bool CImage::LoadTexture(GLuint* out_texture)
 {
     // Load from file
-    unsigned char* image_data = Mat_to_Byte(*display_img);
+    unsigned char* image_data = Mat_to_Byte(display_img);
 
     if (image_data == NULL)
         return false;
@@ -60,7 +58,7 @@ bool CImage::LoadTexture(GLuint* out_texture)
 
     // Upload pixels into texture
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (*display_img).cols, (*display_img).rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, display_img.cols, display_img.rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
     stbi_image_free(image_data);
 
     *out_texture = image_texture;
@@ -73,7 +71,8 @@ bool CImage::Load_Image(const std::string path, const std::string name)
 	img_path = path;
     img_name = name;
     input_img = cv::imread(path);
-    display_img = &input_img;
+    output_img = input_img.clone();
+    display_img = output_img.clone();
     img_width = input_img.cols;
     img_height = input_img.rows;
 	bool ret = LoadTexture(&img_gui_texture);
@@ -92,12 +91,12 @@ bool CImage::Load_Image(const std::string path, const std::string name)
 
 int CImage::width()
 {
-    return img_width;
+    return display_img.cols;
 }
 
 int CImage::height()
 {
-    return img_height;
+    return display_img.rows;
 }
 
 int CImage::texture()
@@ -110,8 +109,35 @@ std::string CImage::name()
     return img_name;
 }
 
-void CImage::Set_DisplayImage(cv::Mat img)
+void CImage::Set_DIsplay_Input()
 {
-    display_img = &img;
+    display_img = input_img.clone();
     LoadTexture(&img_gui_texture);
+}
+
+void CImage::Set_Display_Output()
+{
+    display_img = output_img.clone();
+    LoadTexture(&img_gui_texture);
+}
+
+void CImage::Reset_Image_Size()
+{
+    cv::resize(output_img, display_img, cv::Size(img_width, img_height));
+    LoadTexture(&img_gui_texture);
+}
+
+void CImage::Set_Image_Size(const int width, const int height)
+{
+    if (width > 0 && height > 0)
+    {
+        cv::resize(output_img, display_img, cv::Size(width, height));
+        LoadTexture(&img_gui_texture);
+    }
+}
+
+void CImage::Reset()
+{
+    output_img = input_img.clone();
+    Set_Display_Output();
 }

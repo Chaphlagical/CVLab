@@ -56,19 +56,18 @@ void CUI::ShowUI(bool* p_open_flag)
     IM_ASSERT(ImGui::GetCurrentContext() != NULL && "Missing dear imgui context. Refer to examples app!"); // Exceptionally add an extra assert here for people confused with initial dear imgui setup
     p_open = p_open_flag;
     //TODO:: show main UI
-    ImGui::SetNextWindowPos(ImVec2(50, 50), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(400, 500), ImGuiCond_FirstUseEver);
 
     ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
 
     AddMainMenuBar();
+
     DisplayImage();
-           
+    
 }
 
 void CUI::OpenImageFIleDialog()
 {
-    ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose File", ".png\0.jpg\0.bmp\0.jpeg\0\0", ".");
+    ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose File", ".jpg\0.png\0.bmp\0.jpeg\0\0", ".");
 }
 
 void CUI::DisplayImageFIleDialog()
@@ -110,6 +109,15 @@ void CUI::AddMainMenuBar()
             }
             ImGui::EndMenu();
         }
+        if (ImGui::BeginMenu("Setting"))
+        {
+            if (ImGui::BeginMenu("Color Setting"))
+            {
+                ImGui::ColorEdit4("Color", clear_color);
+                ImGui::EndMenu();
+            }
+            ImGui::EndMenu();
+        }
         ImGui::EndMainMenuBar();
     }
     DisplayImageFIleDialog();
@@ -124,20 +132,8 @@ void CUI::AddMenuBar()
             AddMenuFile();
             ImGui::EndMenu();
         }
-        
-        if (ImGui::BeginMenu("Load"))
-        {
-            if (ImGui::MenuItem("Load Yolo Model"))
-            {
-                if (!yolo_detection.IsModelLoad())
-                    yolo_detection.Load_Model();
-            }
-            ImGui::EndMenu();
-        }
-
         ImGui::EndMenuBar();
     }
-    DisplayImageFIleDialog();
 }
 
 void CUI::AddMenuFile()
@@ -155,13 +151,6 @@ void CUI::AddMenuFile()
     }*/
     if (ImGui::MenuItem("Save", "Ctrl+S")) {}
     if (ImGui::MenuItem("Save As..")) {}
-    ImGui::Separator();
-
-    if (ImGui::BeginMenu("Color Setting"))
-    {
-        ImGui::ColorEdit4("Color", clear_color);
-        ImGui::EndMenu();
-    }
 }
 
 void CUI::DisplayImage()
@@ -173,7 +162,7 @@ void CUI::DisplayImage()
         bool flag = *flag_iter;
         if (flag)
         {
-            ImGui::Begin((*cimg_iter).name().c_str(), &flag);
+            ImGui::Begin((*cimg_iter).name().c_str(), &flag, window_flags);
             ImageTool(*cimg_iter);
             const auto flag_iter_temp = flag_iter;
             *flag_iter_temp = flag;
@@ -202,16 +191,25 @@ void CUI::AddImage(const std::string path, const std::string name)
 }
 
 void CUI::ImageTool(CImage& cimg)
-{
-    if (ImGui::Button("Object Detection"))
+{   
+    if (ImGui::BeginMenuBar())
     {
-        if (!yolo_detection.IsModelLoad())
-            yolo_detection.Load_Model();
-        yolo_detection.Detection(cimg.input_img, cimg.output_img);
-        if (yolo_detection.Get_Result(cimg.res_boxes, cimg.res_classes))
+        if (ImGui::BeginMenu("Algorithm"))
         {
-            cimg.Set_DisplayImage(cimg.output_img);
-            std::cout << "aa" << std::endl;
-        }
-    }
+            if (ImGui::MenuItem("Object Detection"))
+            {
+                if (!yolo_detection.IsModelLoad())
+                    yolo_detection.Load_Model();
+                yolo_detection.Detection(cimg.input_img, cimg.output_img);
+                if (yolo_detection.Get_Result(cimg.res_boxes, cimg.res_classes))
+                {
+                    cimg.Set_Display_Output();
+                }
+            }
+            ImGui::EndMenu();
+        }       
+        ImGui::EndMenuBar();
+    }    
+    if (cimg.width() != ImGui::GetContentRegionAvail().x || cimg.height() != ImGui::GetContentRegionAvail().y)
+        cimg.Set_Image_Size(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y);
 }
