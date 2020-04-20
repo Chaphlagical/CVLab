@@ -14,6 +14,17 @@ Paper [link](http://openaccess.thecvf.com/content_CVPR_2019/papers/Weng_Photo_Wa
 * OpenCV 4.2.0
 * GLFW
 
+## Feature
+
+
+- [ ] 
+
+- [x] Yolov3 object detection for images
+- [ ] Yolov3 object detection for videos
+- [ ] Yolov3 object detection for camera flow
+- [ ] Mask RCNN for images
+- [ ] Open Pose for human pose estimation
+
 ## Introduction
 
 ### Download Models
