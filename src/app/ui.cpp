@@ -65,11 +65,13 @@ void CUI::ShowUI(bool* p_open_flag)
     
 }
 
+//  Add a File Dialog, place where you want to open a file
 void CUI::OpenImageFIleDialog()
 {
     ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose File", ".jpg\0.png\0.bmp\0.jpeg\0\0", ".");
 }
 
+//  Display image file dialog, place it at the end of menubar function
 void CUI::DisplayImageFIleDialog()
 {
     // display
@@ -91,6 +93,7 @@ void CUI::DisplayImageFIleDialog()
     
 }
 
+// Add a main menu bar
 void CUI::AddMainMenuBar()
 {
     if (ImGui::BeginMainMenuBar())
@@ -98,15 +101,6 @@ void CUI::AddMainMenuBar()
         if (ImGui::BeginMenu("File"))
         {
             AddMenuFile();
-            ImGui::EndMenu();
-        }
-        if (ImGui::BeginMenu("Load"))
-        {
-            if (ImGui::MenuItem("Load Yolo Model"))
-            {
-                if (!yolo_detection.IsModelLoad())
-                    yolo_detection.Load_Model();
-            }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Setting"))
@@ -123,6 +117,7 @@ void CUI::AddMainMenuBar()
     DisplayImageFIleDialog();
 }
 
+//  Add menu bar
 void CUI::AddMenuBar()
 {
     if (ImGui::BeginMenuBar())
@@ -136,6 +131,7 @@ void CUI::AddMenuBar()
     }
 }
 
+//  Add menu file
 void CUI::AddMenuFile()
 {
     //ImGui::MenuItem("(dummy menu)", NULL, false, false);
@@ -153,6 +149,19 @@ void CUI::AddMenuFile()
     if (ImGui::MenuItem("Save As..")) {}
 }
 
+ImVec2 CUI::Get_window_mouse_pos()
+{
+    ImVec2 pos;
+    float delta_x = ImGui::GetWindowWidth() - ImGui::GetContentRegionAvail().x;
+    float delta_y = ImGui::GetWindowHeight() - ImGui::GetContentRegionAvail().y;
+    pos.x = ImGui::GetMousePos().x - ImGui::GetWindowPos().x - delta_x;
+    pos.y = ImGui::GetMousePos().y - ImGui::GetWindowPos().y - delta_y;
+    return pos;
+}
+
+//////////////////////////////////////// Image UI //////////////////////////////////////////////////
+
+//  display images list
 void CUI::DisplayImage()
 {
     if(CImg_list.size()>0)
@@ -179,8 +188,6 @@ void CUI::DisplayImage()
                 ImGui::Begin((*cimg_iter).name().c_str(), &temp_flag, window_flags);
                 ImageTool(*cimg_iter);
                 (*flag_iter)[1] = temp_flag;
-                //(*flag_iter)[1] = temp_flag;
-                std::cout << temp_flag << std::endl;
                 ImGui::Image((void*)(intptr_t)(*cimg_iter).texture(), ImVec2((*cimg_iter).width(), (*cimg_iter).height()));
                 ImGui::End();
             }
@@ -191,6 +198,7 @@ void CUI::DisplayImage()
 
 }
 
+//  add an image to the list
 void CUI::AddImage(const std::string path, const std::string name)
 {
     CImage cimg;
@@ -203,8 +211,17 @@ void CUI::AddImage(const std::string path, const std::string name)
     }
 }
 
+//  add an image tool
 void CUI::ImageTool(CImage& cimg)
 {   
+    int select_flag = 0;
+    if (ImGui::IsMouseClicked(1))
+    {
+        cimg.Select_Boundingbox(Get_window_mouse_pos());
+        select_flag = 1;
+    }
+        
+
     if (ImGui::BeginMenuBar())
     {
         if (ImGui::BeginMenu("Algorithm"))
@@ -224,9 +241,10 @@ void CUI::ImageTool(CImage& cimg)
         ImGui::EndMenuBar();
     }    
     if (cimg.width() != ImGui::GetContentRegionAvail().x || cimg.height() != ImGui::GetContentRegionAvail().y)
-        cimg.Set_Image_Size(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y);
+        cimg.Set_Image_Size(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y, select_flag);
 }
 
+//  add an image menu
 void CUI::ImageMenu()
 {
     bool controller_flag = true;
@@ -253,6 +271,7 @@ void CUI::ImageMenu()
     }
     if(yolo_detection.IsModelLoad())
         ImGui::Text("Yolo Model Loaded!");
+
     ImGui::End();    
     if (!controller_flag)
     {
@@ -260,3 +279,4 @@ void CUI::ImageMenu()
         CImg_list.clear();
     }
 }
+

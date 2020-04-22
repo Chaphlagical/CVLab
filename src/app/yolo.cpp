@@ -5,16 +5,7 @@ using namespace Chaf;
 
 CYolo::CYolo()
 {
-	Init();
-}
-
-void CYolo::Init()
-{
-	model_cfg_path = "";
-	object_name_path = "";
-	weight_path = "";
-
-	class_names.clear();
+	 Init();
 }
 
 void CYolo::Load_Model()
@@ -33,17 +24,18 @@ void CYolo::Load_Model()
 
 	// load network model
 	weight_path = "../data/models/yolov3/yolov3.weights";
-	model_cfg_path = "../data/models/yolov3/yolov3.cfg";
+	model_path = "../data/models/yolov3/yolov3.cfg";
 
-	yolo_net = cv::dnn::readNetFromDarknet(model_cfg_path, weight_path);
-	yolo_net.setPreferableBackend(cv::dnn::DNN_BACKEND_OPENCV);
-	yolo_net.setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
+	net = cv::dnn::readNetFromDarknet(model_path, weight_path);
+	net.setPreferableBackend(cv::dnn::DNN_BACKEND_OPENCV);
+	net.setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
 
 	is_model_load = true;
 }
 
 void CYolo::Detection(cv::Mat input_img)
 {
+	isdetected = false;
 	if (input_img.empty())
 	{
 		std::cout << "No image input!" << std::endl;
@@ -53,42 +45,33 @@ void CYolo::Detection(cv::Mat input_img)
 	static cv::Mat blob;
 	cv::dnn::blobFromImage(input_img, blob, 1.0, cv::Size(inpWidth,inpHeight), cv::Scalar(0,0,0), true, false, CV_8U);
 	
-	yolo_net.setInput(blob, "", 0.00392, cv::Scalar{0,0,0});
+	net.setInput(blob, "", 0.00392, cv::Scalar{0,0,0});
 
-	yolo_net.forward(outs, Get_Output_Name());
+	net.forward(outs, Get_Output_Name());
 
 	postprocess(input_img);
+	isdetected = true;
 }
 
 void CYolo::Detection(cv::Mat input_img, cv::Mat& output_img)
 {
+	isdetected = false;
 	if (input_img.empty())
 	{
 		std::cout << "No image input!" << std::endl;
 		return;
 	}
 
-	clock_t t = clock();
-
 	static cv::Mat blob;
 	cv::dnn::blobFromImage(input_img, blob, 1.0, cv::Size(inpWidth, inpHeight), cv::Scalar(0, 0, 0), true, false, CV_8U);
 
-	std::cout << clock() - t << std::endl;
-	t = clock();
+	net.setInput(blob, "", 0.00392, cv::Scalar{ 0,0,0 });
 
-	yolo_net.setInput(blob, "", 0.00392, cv::Scalar{ 0,0,0 });
-	std::cout << clock() - t << std::endl;
-	t = clock();
-
-	yolo_net.forward(outs, Get_Output_Name());
-
-	std::cout << clock() - t << std::endl;
-	t = clock();
+	net.forward(outs, Get_Output_Name());
 
 	postprocess(input_img, output_img);
 
-	std::cout << clock() - t << std::endl;
-	t = clock();
+	isdetected = true;
 }
 
 std::vector<std::string> CYolo::Get_Output_Name()
@@ -96,8 +79,8 @@ std::vector<std::string> CYolo::Get_Output_Name()
 	static std::vector<cv::String> names;
 	if (names.empty()) {
 
-		std::vector<int> outLayers = yolo_net.getUnconnectedOutLayers();
-		std::vector<std::string> layersNames = yolo_net.getLayerNames();
+		std::vector<int> outLayers = net.getUnconnectedOutLayers();
+		std::vector<std::string> layersNames = net.getLayerNames();
 
 		names.resize(outLayers.size());
 		for (size_t i = 0; i < outLayers.size(); i++) {
@@ -232,7 +215,7 @@ bool CYolo::Get_Result(std::vector<cv::Rect>& boxes, std::vector<std::string>& c
 	return true;
 }
 
-bool CYolo::IsModelLoad()
+bool CYolo::IsDetected()
 {
-	return is_model_load;
+	return isdetected;
 }

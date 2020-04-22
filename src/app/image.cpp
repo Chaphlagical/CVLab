@@ -127,11 +127,14 @@ void CImage::Reset_Image_Size()
     LoadTexture(&img_gui_texture);
 }
 
-void CImage::Set_Image_Size(const int width, const int height)
+void CImage::Set_Image_Size(const int width, const int height, const int set_flag)
 {
     if (width > 0 && height > 0)
     {
-        cv::resize(output_img, display_img, cv::Size(width, height));
+        if(set_flag==0)
+            cv::resize(output_img, display_img, cv::Size(width, height));
+        else if(set_flag==1)
+            cv::resize(display_img, display_img, cv::Size(width, height));
         LoadTexture(&img_gui_texture);
     }
 }
@@ -140,4 +143,45 @@ void CImage::Reset()
 {
     output_img = input_img.clone();
     Set_Display_Output();
+}
+
+void CImage::Select_Boundingbox(ImVec2 pos)
+{
+    ImVec2 scale_vec;
+    scale_vec.x = (float)input_img.cols / (float)display_img.cols;
+    scale_vec.y = (float)input_img.rows / (float)display_img.rows;
+    pos.x *= scale_vec.x;
+    pos.y *= scale_vec.y;
+    if (res_boxes.size() > 0)
+    {
+        for (size_t i = 0; i < res_boxes.size(); i++)
+        {
+            if (pos.x - res_boxes[i].x < res_boxes[i].width && pos.y - res_boxes[i].y < res_boxes[i].height
+                &&pos.x>res_boxes[i].x&&pos.y>res_boxes[i].y)
+            {
+                select_box = res_boxes[i];
+                select_img = input_img(select_box);
+                display_img = output_img.clone();
+
+                for (size_t x = select_box.x; x < (size_t)select_box.x+ (size_t)select_box.width; x++)
+                {
+                    for (size_t y = select_box.y; y < (size_t)select_box.y+ (size_t)select_box.height; y++)
+                    {
+                        if (display_img.at<cv::Vec3b>(y, x)[0] < 255 - 100)
+                        {
+                            display_img.at<cv::Vec3b>(y, x)[0] +=100;
+                        }
+                        else
+                            display_img.at<cv::Vec3b>(y, x)[0] = 255;
+                    }
+                }
+                LoadTexture(&img_gui_texture);
+                return;
+            }
+            else
+            {
+                Set_Display_Output();
+            }
+        }
+    }
 }

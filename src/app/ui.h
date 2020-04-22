@@ -98,6 +98,9 @@ namespace Chaf
 		void ImageTool(CImage& cimg);
 		void ImageMenu();
 
+	private:
+		ImVec2 Get_window_mouse_pos();
+
 
 	private:
 		std::string w_name;

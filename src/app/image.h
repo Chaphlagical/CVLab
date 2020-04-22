@@ -5,6 +5,7 @@
 #include <string>
 //#include "glfw/glfw3.h"
 #include "glad/glad.h"
+#include "imgui/imgui.h"
 
 namespace Chaf
 {
@@ -19,15 +20,18 @@ namespace Chaf
 		void Set_Display_Output();
 		void Set_DIsplay_Input();
 		void Reset_Image_Size();
-		void Set_Image_Size(const int width, const int height);
+		void Set_Image_Size(const int width, const int height, const int set_flag=0);	//	set_flag =0: set from output_img; =1: set from display_img
 		void Reset();
+		void Select_Boundingbox(ImVec2 pos);
 
 	public:
 		cv::Mat input_img;
 		cv::Mat output_img;
+		cv::Mat select_img;
 
 		std::vector<cv::Rect> res_boxes;
 		std::vector<std::string> res_classes;
+		cv::Rect select_box;
 
 	public:
 		int width();
