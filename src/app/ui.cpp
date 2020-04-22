@@ -155,26 +155,38 @@ void CUI::AddMenuFile()
 
 void CUI::DisplayImage()
 {
+    if(CImg_list.size()>0)
+        ImageMenu();
+
     auto flag_iter = CImg_flag_list.begin();
     auto cimg_iter = CImg_list.begin();
+    
     while (flag_iter != CImg_flag_list.end() && cimg_iter != CImg_list.end())
     {
-        bool flag = *flag_iter;
-        if (flag)
-        {
-            ImGui::Begin((*cimg_iter).name().c_str(), &flag, window_flags);
-            ImageTool(*cimg_iter);
-            const auto flag_iter_temp = flag_iter;
-            *flag_iter_temp = flag;
-            ImGui::Image((void*)(intptr_t)(*cimg_iter).texture(), ImVec2((*cimg_iter).width(), (*cimg_iter).height()));
-            ImGui::End();
-            flag_iter++; cimg_iter++;
-        }
-        else
+        bool hide_flag = (*flag_iter)[0];
+        bool open_flag = (*flag_iter)[1];
+
+        if (!open_flag)
         {
             flag_iter = CImg_flag_list.erase(flag_iter);
             cimg_iter = CImg_list.erase(cimg_iter);
         }
+        else
+        {
+            bool temp_flag = hide_flag;
+            if (hide_flag)
+            {
+                ImGui::Begin((*cimg_iter).name().c_str(), &temp_flag, window_flags);
+                ImageTool(*cimg_iter);
+                (*flag_iter)[1] = temp_flag;
+                //(*flag_iter)[1] = temp_flag;
+                std::cout << temp_flag << std::endl;
+                ImGui::Image((void*)(intptr_t)(*cimg_iter).texture(), ImVec2((*cimg_iter).width(), (*cimg_iter).height()));
+                ImGui::End();
+            }
+            flag_iter++; cimg_iter++;
+        }
+        
     }
 
 }
@@ -184,8 +196,9 @@ void CUI::AddImage(const std::string path, const std::string name)
     CImage cimg;
     if (cimg.Load_Image(path, name))
     {
-        bool flag = true;
-        CImg_flag_list.push_back(flag);
+        std::vector<bool> temp_vec = { true,true };
+        CImg_flag_list.push_back(temp_vec);
+
         CImg_list.push_back(cimg);
     }
 }
@@ -212,4 +225,38 @@ void CUI::ImageTool(CImage& cimg)
     }    
     if (cimg.width() != ImGui::GetContentRegionAvail().x || cimg.height() != ImGui::GetContentRegionAvail().y)
         cimg.Set_Image_Size(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y);
+}
+
+void CUI::ImageMenu()
+{
+    bool controller_flag = true;
+    if (CImg_flag_list.size() == 0)
+        controller_flag = !controller_flag;
+    ImGui::Begin("Image Menu", &controller_flag);
+    ImGui::Text("Images Displayment");
+    auto flag_iter = CImg_flag_list.begin();
+    auto cimg_iter = CImg_list.begin();
+    
+    while (flag_iter != CImg_flag_list.end() && cimg_iter != CImg_list.end())
+    {
+        bool temp_flag = (*flag_iter)[0];
+        ImGui::Checkbox((*cimg_iter).name().c_str(), &temp_flag);
+        (*flag_iter)[0] = temp_flag;
+        flag_iter++; cimg_iter++;
+    }
+
+    ImGui::Text("Load Models");
+    if (ImGui::Button("Load Yolo Model"))
+    {
+        if (!yolo_detection.IsModelLoad())
+            yolo_detection.Load_Model(); 
+    }
+    if(yolo_detection.IsModelLoad())
+        ImGui::Text("Yolo Model Loaded!");
+    ImGui::End();    
+    if (!controller_flag)
+    {
+        CImg_flag_list.clear();
+        CImg_list.clear();
+    }
 }

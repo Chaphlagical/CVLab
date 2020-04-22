@@ -92,10 +92,11 @@ namespace Chaf
 	// Image Setting
 	private:
 		std::vector<CImage> CImg_list;
-		std::vector<bool> CImg_flag_list;
+		std::vector<std::vector<bool>> CImg_flag_list; // 0: hide flag, 1: close flag
 		void DisplayImage();
 		void AddImage(const std::string path, const std::string name);
 		void ImageTool(CImage& cimg);
+		void ImageMenu();
 
 
 	private:

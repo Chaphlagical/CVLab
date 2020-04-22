@@ -68,14 +68,27 @@ void CYolo::Detection(cv::Mat input_img, cv::Mat& output_img)
 		return;
 	}
 
+	clock_t t = clock();
+
 	static cv::Mat blob;
 	cv::dnn::blobFromImage(input_img, blob, 1.0, cv::Size(inpWidth, inpHeight), cv::Scalar(0, 0, 0), true, false, CV_8U);
 
+	std::cout << clock() - t << std::endl;
+	t = clock();
+
 	yolo_net.setInput(blob, "", 0.00392, cv::Scalar{ 0,0,0 });
+	std::cout << clock() - t << std::endl;
+	t = clock();
 
 	yolo_net.forward(outs, Get_Output_Name());
 
+	std::cout << clock() - t << std::endl;
+	t = clock();
+
 	postprocess(input_img, output_img);
+
+	std::cout << clock() - t << std::endl;
+	t = clock();
 }
 
 std::vector<std::string> CYolo::Get_Output_Name()
