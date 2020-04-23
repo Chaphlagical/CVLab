@@ -41,6 +41,12 @@ Place them in  `./data/models/yolov3/`
 
 ### Object Detection
 
-Using OpenCV + Yolo detect people
+YoloV3
 
 ![image-20200419233642340](README.assets/image-20200419233642340.png)
+
+### Object Segmentation
+
+Mask-RCNN
+
+![image-20200423225346132](README.assets/image-20200423225346132.png)

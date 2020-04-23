@@ -179,3 +179,8 @@ void CMaskRCNN::draw_mask(cv::Mat& img, int classid, cv::Rect box, cv::Mat& obje
 
 	cv::putText(img, class_names[classid], cv::Point(box.x, box.y), cv::FONT_HERSHEY_SIMPLEX, 0.75, cv::Scalar(0, 0, 0), 1);
 }
+
+void CMaskRCNN::reload_net()
+{
+	net = cv::dnn::readNetFromTensorflow(weight_path, model_path);
+}

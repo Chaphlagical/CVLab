@@ -27,6 +27,7 @@ namespace Chaf
 
 			net.forward(outs, Get_Output_Name());
 			postprocess(input_img);
+			reload_net();
 			flag = true;
 		}
 
@@ -43,9 +44,7 @@ namespace Chaf
 			net.forward(outs, Get_Output_Name());
 
 			postprocess(input_img, output_img);
-
-			net = cv::dnn::readNetFromTensorflow(weight_path, model_path);
-
+			reload_net();
 			flag = true;
 		}
 
@@ -64,6 +63,7 @@ namespace Chaf
 		virtual void postprocess(cv::Mat input_img) = 0;
 		virtual void postprocess(cv::Mat input_img, cv::Mat& output_img) = 0;
 		virtual void set_net_input(cv::Mat& input_img) = 0;
+		virtual void reload_net() {}
 
 		void drawPred(int classId, float conf, int left, int top, int right, int bottom, cv::Mat& frame)
 		{
