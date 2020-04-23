@@ -81,14 +81,6 @@ bool CImage::Load_Image(const std::string path, const std::string name)
     return true;
 }
 
-/*void CImage::Object_Detection()
-{
-    yolo_detection.Load_Model();
-    std::cout << "Load Model Complete" << std::endl;
-	yolo_detection.Load_Image(img_path);
-	yolo_detection.Process(false);
-}*/
-
 int CImage::width()
 {
     return display_img.cols;
@@ -119,6 +111,20 @@ void CImage::Set_Display_Output()
 {
     display_img = output_img.clone();
     LoadTexture(&img_gui_texture);
+}
+
+void CImage::Set_Select()
+{
+    if (!select_img.empty())
+    {
+        output_img = select_img.clone();
+        input_img = select_img.clone();
+        display_img = select_img.clone();
+        res_boxes.clear(); res_classes.clear();
+        img_height = select_img.rows;
+        img_width = select_img.cols;
+        LoadTexture(&img_gui_texture);
+    }
 }
 
 void CImage::Reset_Image_Size()
@@ -180,6 +186,7 @@ void CImage::Select_Boundingbox(ImVec2 pos)
             }
             else
             {
+                select_img.release();
                 Set_Display_Output();
             }
         }

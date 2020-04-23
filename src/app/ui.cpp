@@ -202,7 +202,18 @@ void CUI::DisplayImage()
 void CUI::AddImage(const std::string path, const std::string name)
 {
     CImage cimg;
-    if (cimg.Load_Image(path, name))
+    std::string name_=name;
+
+    for (size_t i = 0; i < CImg_list.size(); i++)
+    {
+        if (name_ == CImg_list[i].name())
+        {
+            name_ = name_ + "_";
+            i = 0;
+        }
+    }
+
+    if (cimg.Load_Image(path, name_))
     {
         std::vector<bool> temp_vec = { true,true };
         CImg_flag_list.push_back(temp_vec);
@@ -224,20 +235,42 @@ void CUI::ImageTool(CImage& cimg)
 
     if (ImGui::BeginMenuBar())
     {
-        if (ImGui::BeginMenu("Algorithm"))
+        if (ImGui::BeginMenu("Function"))
         {
             if (ImGui::MenuItem("Object Detection"))
             {
                 if (!yolo_detection.IsModelLoad())
                     yolo_detection.Load_Model();
-                yolo_detection.Detection(cimg.input_img, cimg.output_img);
+                if(!cimg.is_detected)
+                    yolo_detection.Process(cimg.input_img, cimg.output_img, cimg.is_detected);
                 if (yolo_detection.Get_Result(cimg.res_boxes, cimg.res_classes))
-                {
                     cimg.Set_Display_Output();
-                }
+
             }
+            if (ImGui::MenuItem("Object Segment"))
+            {
+                if (!maskrcnn_segment.IsModelLoad())
+                    maskrcnn_segment.Load_Model();
+                if (!cimg.is_segment)
+                    maskrcnn_segment.Process(cimg.input_img, cimg.output_img, cimg.is_segment);
+                if (maskrcnn_segment.Get_Result(cimg.segment_mask))
+                    cimg.Set_Display_Output();
+                    
+            }
+
             ImGui::EndMenu();
         }       
+
+        if (ImGui::BeginMenu("Setting"))
+        {
+            if (ImGui::MenuItem("Set Select Image"))
+            {
+                cimg.Set_Select();
+            }
+
+            ImGui::EndMenu();
+        }
+
         ImGui::EndMenuBar();
     }    
     if (cimg.width() != ImGui::GetContentRegionAvail().x || cimg.height() != ImGui::GetContentRegionAvail().y)
@@ -250,10 +283,26 @@ void CUI::ImageMenu()
     bool controller_flag = true;
     if (CImg_flag_list.size() == 0)
         controller_flag = !controller_flag;
-    ImGui::Begin("Image Menu", &controller_flag);
+
+    ImGui::SetNextWindowBgAlpha(0.5);
+    ImGui::Begin("Image Menu", &controller_flag,window_flags);
     ImGui::Text("Images Displayment");
     auto flag_iter = CImg_flag_list.begin();
     auto cimg_iter = CImg_list.begin();
+
+    ImGui::BeginMenuBar();
+    if (ImGui::BeginMenu("File"))
+    {
+        if (ImGui::MenuItem("Open"))
+        {
+            OpenImageFIleDialog();
+        }
+
+        ImGui::EndMenu();
+    }
+
+
+    ImGui::EndMenuBar();
     
     while (flag_iter != CImg_flag_list.end() && cimg_iter != CImg_list.end())
     {
@@ -263,6 +312,7 @@ void CUI::ImageMenu()
         flag_iter++; cimg_iter++;
     }
 
+    ImGui::Separator();
     ImGui::Text("Load Models");
     if (ImGui::Button("Load Yolo Model"))
     {
@@ -272,7 +322,16 @@ void CUI::ImageMenu()
     if(yolo_detection.IsModelLoad())
         ImGui::Text("Yolo Model Loaded!");
 
+    if (ImGui::Button("Load Mask-RCNN Model"))
+    {
+        //if (!maskrcnn_segment.IsModelLoad())
+            maskrcnn_segment.Load_Model();
+    }
+    if (maskrcnn_segment.IsModelLoad())
+        ImGui::Text("Mask-RCNN Model Loaded!");
+
     ImGui::End();    
+
     if (!controller_flag)
     {
         CImg_flag_list.clear();

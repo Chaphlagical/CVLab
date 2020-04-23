@@ -63,6 +63,7 @@
 #include "imgui/ImGuiFileDialog.h"
 #include "image.h"
 #include "yolo.h"
+#include "maskrcnn.h"
 #include <Windows.h>
 
 namespace Chaf
@@ -110,7 +111,7 @@ namespace Chaf
 	//	CV module
 	private:
 		CYolo yolo_detection;
-
+		CMaskRCNN maskrcnn_segment;
 
 	private:
 		bool no_titlebar;

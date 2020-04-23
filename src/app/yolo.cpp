@@ -33,47 +33,6 @@ void CYolo::Load_Model()
 	is_model_load = true;
 }
 
-void CYolo::Detection(cv::Mat input_img)
-{
-	isdetected = false;
-	if (input_img.empty())
-	{
-		std::cout << "No image input!" << std::endl;
-		return;
-	}
-
-	static cv::Mat blob;
-	cv::dnn::blobFromImage(input_img, blob, 1.0, cv::Size(inpWidth,inpHeight), cv::Scalar(0,0,0), true, false, CV_8U);
-	
-	net.setInput(blob, "", 0.00392, cv::Scalar{0,0,0});
-
-	net.forward(outs, Get_Output_Name());
-
-	postprocess(input_img);
-	isdetected = true;
-}
-
-void CYolo::Detection(cv::Mat input_img, cv::Mat& output_img)
-{
-	isdetected = false;
-	if (input_img.empty())
-	{
-		std::cout << "No image input!" << std::endl;
-		return;
-	}
-
-	static cv::Mat blob;
-	cv::dnn::blobFromImage(input_img, blob, 1.0, cv::Size(inpWidth, inpHeight), cv::Scalar(0, 0, 0), true, false, CV_8U);
-
-	net.setInput(blob, "", 0.00392, cv::Scalar{ 0,0,0 });
-
-	net.forward(outs, Get_Output_Name());
-
-	postprocess(input_img, output_img);
-
-	isdetected = true;
-}
-
 std::vector<std::string> CYolo::Get_Output_Name()
 {
 	static std::vector<cv::String> names;
@@ -138,6 +97,14 @@ void CYolo::postprocess(cv::Mat input_img)
 	}
 }
 
+void CYolo::set_net_input(cv::Mat& input_img)
+{
+	static cv::Mat blob;
+	cv::dnn::blobFromImage(input_img, blob, 1.0, cv::Size(inpWidth, inpHeight), cv::Scalar(0, 0, 0), true, false, CV_8U);
+	net.setInput(blob, "", 0.00392, cv::Scalar{ 0,0,0 });
+	outs.clear();
+}
+
 void CYolo::postprocess(cv::Mat input_img, cv::Mat& output_img)
 {
 	std::vector<int> classIds;
@@ -190,32 +157,12 @@ void CYolo::postprocess(cv::Mat input_img, cv::Mat& output_img)
 	}
 }
 
-void CYolo::drawPred(int classId, float conf, int left, int top, int right, int bottom, cv::Mat& frame) {
-
-	cv::rectangle(frame, cv::Point(left, top), cv::Point(right, bottom), cv::Scalar(255, 178, 50), 3);
-	std::string label = cv::format("%.2f", conf);
-	if (!class_names.empty()) {
-		CV_Assert(classId < (int)class_names.size());
-		label = class_names[classId] + ":" + label;
-	}
-
-	int baseLine;
-	cv::Size labelSize = cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
-	top = std::max(top, labelSize.height);
-	cv::rectangle(frame, cv::Point(left, top - round(1.5 * labelSize.height)), cv::Point(left + round(1.5 * labelSize.width), top + baseLine), cv::Scalar(255, 255, 255), cv::FILLED);
-	cv::putText(frame, label, cv::Point(left, top), cv::FONT_HERSHEY_SIMPLEX, 0.75, cv::Scalar(0, 0, 0), 1);
-}
-
 bool CYolo::Get_Result(std::vector<cv::Rect>& boxes, std::vector<std::string>& classes)
 {
 	if (res_boxes.empty() || res_classes.empty())
 		return false;
+	boxes.clear(); classes.clear();
 	boxes = res_boxes;
 	classes = res_classes;
 	return true;
-}
-
-bool CYolo::IsDetected()
-{
-	return isdetected;
 }

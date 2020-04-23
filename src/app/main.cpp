@@ -51,7 +51,7 @@ static void set_font()
 
     ImGuiIO& io = ImGui::GetIO();
     io.Fonts->AddFontDefault();
-    ImFont* font = io.Fonts->AddFontFromFileTTF("c:/windows/fonts/simhei.ttf", 25.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
+    ImFont* font = io.Fonts->AddFontFromFileTTF("c:/windows/fonts/simhei.ttf", 20.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
     IM_ASSERT(font != NULL);
     ImGui::GetIO().FontDefault = font;
 }
@@ -141,9 +141,9 @@ int main(int, char**)
     bool show_another_window = true;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     Chaf::CUI ui("App");
-            bool p_open = true;
-        bool my_tool_active = true;
-        float* my_color = new float;
+    bool p_open = true;
+    bool my_tool_active = true;
+    float* my_color = new float;
 
     // Main loop
     while (!glfwWindowShouldClose(window))
