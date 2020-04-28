@@ -34,10 +34,12 @@ namespace Chaf
 		std::vector<std::string> res_classes;
 		std::vector<cv::Mat> segment_mask;
 		cv::Rect select_box;
+		std::vector<cv::Point> points;
 
 	public:
 		bool is_detected = false;
 		bool is_segment = false;
+		bool is_pose_estimation = false;
 
 	public:
 		int width();

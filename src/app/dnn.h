@@ -25,7 +25,9 @@ namespace Chaf
 			}
 			set_net_input(input_img);
 
-			net.forward(outs, Get_Output_Name());
+			//net.forward(outs, Get_Output_Name());
+			get_net_output(outs);
+
 			postprocess(input_img);
 			reload_net();
 			flag = true;
@@ -41,7 +43,8 @@ namespace Chaf
 
 			set_net_input(input_img);
 
-			net.forward(outs, Get_Output_Name());
+			//net.forward(outs, Get_Output_Name());
+			get_net_output(outs);
 
 			postprocess(input_img, output_img);
 			reload_net();
@@ -64,6 +67,10 @@ namespace Chaf
 		virtual void postprocess(cv::Mat input_img, cv::Mat& output_img) = 0;
 		virtual void set_net_input(cv::Mat& input_img) = 0;
 		virtual void reload_net() {}
+		virtual void get_net_output(std::vector<cv::Mat>& outs)
+		{
+			net.forward(outs, Get_Output_Name());
+		}
 
 		void drawPred(int classId, float conf, int left, int top, int right, int bottom, cv::Mat& frame)
 		{

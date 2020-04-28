@@ -63,6 +63,7 @@
 #include "imgui/ImGuiFileDialog.h"
 #include "image.h"
 #include "yolo.h"
+#include "pose.h"
 #include "maskrcnn.h"
 #include <Windows.h>
 
@@ -112,6 +113,7 @@ namespace Chaf
 	private:
 		CYolo yolo_detection;
 		CMaskRCNN maskrcnn_segment;
+		CPose open_pose;
 
 	private:
 		bool no_titlebar;

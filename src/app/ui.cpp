@@ -245,7 +245,6 @@ void CUI::ImageTool(CImage& cimg)
                     yolo_detection.Process(cimg.input_img, cimg.output_img, cimg.is_detected);
                 if (yolo_detection.Get_Result(cimg.res_boxes, cimg.res_classes))
                     cimg.Set_Display_Output();
-
             }
             if (ImGui::MenuItem("Object Segment"))
             {
@@ -255,7 +254,15 @@ void CUI::ImageTool(CImage& cimg)
                     maskrcnn_segment.Process(cimg.input_img, cimg.output_img, cimg.is_segment);
                 if (maskrcnn_segment.Get_Result(cimg.segment_mask))
                     cimg.Set_Display_Output();
-                    
+            }
+            if (ImGui::MenuItem("Pose Estimation"))
+            {
+                if (!open_pose.IsModelLoad())
+                    open_pose.Load_Model();
+                if (!cimg.is_pose_estimation)
+                    open_pose.Process(cimg.input_img, cimg.output_img, cimg.is_pose_estimation);
+                if (open_pose.Get_Result(cimg.points))
+                    cimg.Set_Display_Output();
             }
 
             ImGui::EndMenu();
@@ -319,16 +326,26 @@ void CUI::ImageMenu()
         if (!yolo_detection.IsModelLoad())
             yolo_detection.Load_Model(); 
     }
-    if(yolo_detection.IsModelLoad())
-        ImGui::Text("Yolo Model Loaded!");
+
 
     if (ImGui::Button("Load Mask-RCNN Model"))
     {
         //if (!maskrcnn_segment.IsModelLoad())
             maskrcnn_segment.Load_Model();
     }
+
+    if (ImGui::Button("Load Open Pose Model"))
+    {
+        if (!open_pose.IsModelLoad())
+            open_pose.Load_Model();
+    }
+
+    if (yolo_detection.IsModelLoad())
+        ImGui::Text("Yolo Model Loaded!");
     if (maskrcnn_segment.IsModelLoad())
         ImGui::Text("Mask-RCNN Model Loaded!");
+    if (open_pose.IsModelLoad())
+        ImGui::Text("Open Pose Model Loaded!");
 
     ImGui::End();    
 

@@ -2,6 +2,7 @@
 #include <fstream>
 
 using namespace Chaf;
+using namespace std;
 
 CYolo::CYolo()
 {
@@ -33,7 +34,7 @@ void CYolo::Load_Model()
 	is_model_load = true;
 }
 
-std::vector<std::string> CYolo::Get_Output_Name()
+vector<string> CYolo::Get_Output_Name()
 {
 	static std::vector<cv::String> names;
 	if (names.empty()) {
