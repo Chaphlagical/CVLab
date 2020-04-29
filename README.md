@@ -38,14 +38,14 @@ Place them in  `./data/models/yolov3/`
 
 YoloV3
 
-![image-20200419233642340](./images/yolo.png)
+![yolo](http://home.ustc.edu.cn/~chaf/image/yolo.png)
 
 ### Object Segmentation
 
 Mask-RCNN
 
-![image-20200423225346132](./images/mask.png)
+![image-20200423225346132](http://home.ustc.edu.cn/~chaf/image/mask.png)
 
 ### Pose Estimation
 
-![image-20200429134717224](./images/pose.png)
+![image-20200429134717224](http://home.ustc.edu.cn/~chaf/image/pose.png)
