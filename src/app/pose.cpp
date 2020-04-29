@@ -18,14 +18,13 @@ void CPose::Load_Model()
 
 void CPose::set_net_input(cv::Mat& input_img)
 {
-	cv::imshow("a", input_img);
-	static cv::Mat blob = cv::dnn::blobFromImage(input_img, 1.0/255, cv::Size(368, 368), cv::Scalar(0, 0, 0), false, false);
+	cv::Mat blob = cv::dnn::blobFromImage(input_img, 1.0/255, cv::Size(368, 368), cv::Scalar(0, 0, 0), false, false);
 	net.setInput(blob);
-	outs.clear();
 }
 
 void CPose::get_net_output(vector<cv::Mat>& outs)
 {
+	outs.clear();
 	cv::Mat output;
 	output = net.forward();
 	outs.push_back(output);

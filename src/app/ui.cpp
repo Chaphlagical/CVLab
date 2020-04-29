@@ -330,7 +330,7 @@ void CUI::ImageMenu()
 
     if (ImGui::Button("Load Mask-RCNN Model"))
     {
-        //if (!maskrcnn_segment.IsModelLoad())
+        if (!maskrcnn_segment.IsModelLoad())
             maskrcnn_segment.Load_Model();
     }
 

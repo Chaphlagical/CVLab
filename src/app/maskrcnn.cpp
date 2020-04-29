@@ -52,7 +52,7 @@ void CMaskRCNN::Load_Model()
 
 void CMaskRCNN::set_net_input(cv::Mat& input_img)
 {
-	static cv::Mat blob;
+	cv::Mat blob;
 	cv::dnn::blobFromImage(input_img, blob, 1.0, cv::Size(input_img.cols, input_img.rows), cv::Scalar(0, 0, 0), true, false, CV_8U);
 	net.setInput(blob);
 	outs.clear();
@@ -176,8 +176,6 @@ void CMaskRCNN::draw_mask(cv::Mat& img, int classid, cv::Rect box, cv::Mat& obje
 	findContours(mask, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE);
 	drawContours(colorROI, contours, -1, color, 5, cv::LINE_8, hierarchy, 100);
 	colorROI.copyTo(img(box), mask);
-
-	cv::putText(img, class_names[classid], cv::Point(box.x, box.y), cv::FONT_HERSHEY_SIMPLEX, 0.75, cv::Scalar(0, 0, 0), 1);
 }
 
 void CMaskRCNN::reload_net()
