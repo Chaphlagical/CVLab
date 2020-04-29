@@ -19,6 +19,9 @@ An app based on OpenCV and dear-imgui for computer vision demo of OpenCV
 - [x] Mask RCNN for images
 - [x] Open Pose for single human pose estimation
 - [ ] Open Pose for multi-human pose estimation
+- [ ] Artistic Style
+- [ ] Tracking
+- [ ] GAN
 
 ## Introduction
 
