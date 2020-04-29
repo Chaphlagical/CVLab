@@ -17,6 +17,8 @@ namespace Chaf
 
 	public:
 		bool Load_Image(const std::string path, const std::string name="demo");
+		bool Load_Image(int index);
+
 		void Set_Display_Output();
 		void Set_DIsplay_Input();
 		void Set_Select();
@@ -24,6 +26,8 @@ namespace Chaf
 		void Set_Image_Size(const int width, const int height, const int set_flag=0);	//	set_flag =0: set from output_img; =1: set from display_img
 		void Reset();
 		void Select_Boundingbox(ImVec2 pos);
+		void Remove_Background();
+		void Image_Update();
 
 	public:
 		cv::Mat input_img;
@@ -34,6 +38,7 @@ namespace Chaf
 		std::vector<std::string> res_classes;
 		std::vector<cv::Mat> segment_mask;
 		cv::Rect select_box;
+		cv::Mat select_mask;
 		std::vector<cv::Point> points;
 
 	public:
@@ -44,8 +49,11 @@ namespace Chaf
 	public:
 		int width();
 		int height();
-		int texture();
+		GLuint texture();
 		std::string name();
+		bool isVideo();
+		void Switch_Video_mode();
+		bool isVideoplay();
 
 	private:
 		bool LoadTexture(GLuint* out_texture);
@@ -61,6 +69,9 @@ namespace Chaf
 		int img_width = 0;
 		int img_height = 0;
 
+		bool video_tag = false;
+		bool video_control = true;
+		cv::VideoCapture cap;
 		
 	};
 }

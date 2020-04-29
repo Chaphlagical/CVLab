@@ -58,12 +58,13 @@ void CMaskRCNN::set_net_input(cv::Mat& input_img)
 	outs.clear();
 }
 
-bool CMaskRCNN::Get_Result(std::vector<cv::Mat>& mask)
+bool CMaskRCNN::Get_Result(std::vector<cv::Mat>& mask, std::vector<cv::Rect>& box)
 {
-	if (mask_list.empty())
+	if (mask_list.empty() || box_list.empty())
 		return false;
 	mask.clear();
 	mask = mask_list;
+	box = box_list;
 	return true;
 }
 
@@ -81,6 +82,7 @@ void CMaskRCNN::postprocess(cv::Mat input_img)
 	cv::Mat outDetections = outs[0];
 	cv::Mat outMasks = outs[1];
 	mask_list.clear();
+	box_list.clear();
 
 	const int numDetections = outDetections.size[2];
 
@@ -110,6 +112,7 @@ void CMaskRCNN::postprocess(cv::Mat input_img)
 			cv::Mat objectMask(outMasks.size[2], outMasks.size[3], CV_32F, outMasks.ptr<float>(i, classId));
 			resize(objectMask, objectMask, cv::Size(box.width, box.height));
 			mask_list.push_back(objectMask);
+			box_list.push_back(box);
 		}
 	}
 }
@@ -159,6 +162,8 @@ void CMaskRCNN::postprocess(cv::Mat input_img, cv::Mat& output_img)
 			cv::Mat objectMask(outMasks.size[2], outMasks.size[3], CV_32F, outMasks.ptr<float>(i, classId));
 			resize(objectMask, objectMask, cv::Size(box.width, box.height));
 			mask_list.push_back(objectMask);
+			box_list.push_back(box);
+			
 			draw_mask(output_img, classId, box, objectMask);
 		}
 	}

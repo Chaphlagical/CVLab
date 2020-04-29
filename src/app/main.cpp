@@ -81,7 +81,7 @@ int main(int, char**)
 #endif
 
     // Create window with graphics context
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Photo Wake Up! Demo", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "CVLab@Chaf", NULL, NULL);
     if (window == NULL)
         return 1;
     glfwMakeContextCurrent(window);

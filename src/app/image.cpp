@@ -68,14 +68,40 @@ bool CImage::LoadTexture(GLuint* out_texture)
 
 bool CImage::Load_Image(const std::string path, const std::string name)
 {
-	img_path = path;
+    if (path.substr(path.length() - 4, 4) == ".mp4")
+    {
+        cap.open(path);
+        cap >> input_img;
+        video_tag = true;
+    }
+    else
+    {
+        input_img = cv::imread(path);
+    }
+    img_path = path;
     img_name = name;
-    input_img = cv::imread(path);
+    
     output_img = input_img.clone();
     display_img = output_img.clone();
     img_width = input_img.cols;
     img_height = input_img.rows;
 	bool ret = LoadTexture(&img_gui_texture);
+    if (!ret)
+        return false;
+    return true;
+}
+
+bool CImage::Load_Image(int index)
+{
+    cap.open(0);
+    video_tag = true;
+    img_name = "Camera";
+    cap >> input_img;
+    output_img = input_img.clone();
+    display_img = output_img.clone();
+    img_width = input_img.cols;
+    img_height = input_img.rows;
+    bool ret = LoadTexture(&img_gui_texture);
     if (!ret)
         return false;
     return true;
@@ -91,7 +117,7 @@ int CImage::height()
     return display_img.rows;
 }
 
-int CImage::texture()
+GLuint CImage::texture()
 {
     return img_gui_texture;
 }
@@ -113,6 +139,21 @@ void CImage::Set_Display_Output()
     LoadTexture(&img_gui_texture);
 }
 
+void CImage::Image_Update()
+{
+    if (!video_tag||!video_control)
+        return;
+    
+    cv::Mat temp_img;
+    cap >> temp_img;
+    if (temp_img.empty())return;
+    cap.set(cv::CV__CAP_PROP_LATEST, 0);
+    input_img = temp_img.clone();
+    output_img = input_img.clone();
+    Set_Display_Output();
+    temp_img.release();
+}
+
 void CImage::Set_Select()
 {
     if (!select_img.empty())
@@ -125,6 +166,24 @@ void CImage::Set_Select()
         img_width = select_img.cols;
         LoadTexture(&img_gui_texture);
     }
+}
+
+void CImage::Remove_Background()
+{
+    if (select_mask.empty())
+        return;
+
+    //cv::Mat temp = segment_mask[0];
+    cv::Mat img_masked;
+    select_img.copyTo(img_masked, select_mask);
+    output_img = img_masked.clone();
+    input_img = output_img.clone();
+    display_img = output_img.clone();
+    res_boxes.clear(); segment_mask.clear();
+    img_height = output_img.rows;
+    img_width = output_img.cols;
+    LoadTexture(&img_gui_texture);
+    img_masked.release();
 }
 
 void CImage::Reset_Image_Size()
@@ -182,13 +241,34 @@ void CImage::Select_Boundingbox(ImVec2 pos)
                     }
                 }
                 LoadTexture(&img_gui_texture);
+                if (!segment_mask.empty())
+                {
+                    select_mask = (segment_mask[i]>0.5);
+                }
                 return;
             }
             else
             {
+                select_mask.release();
                 select_img.release();
                 Set_Display_Output();
             }
         }
     }
+}
+
+
+bool CImage::isVideo()
+{
+    return video_tag;
+}
+
+void CImage::Switch_Video_mode()
+{
+    video_control = !video_control;
+}
+
+bool CImage::isVideoplay()
+{
+    return video_control;
 }

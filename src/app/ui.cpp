@@ -68,7 +68,7 @@ void CUI::ShowUI(bool* p_open_flag)
 //  Add a File Dialog, place where you want to open a file
 void CUI::OpenImageFIleDialog()
 {
-    ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose File", ".jpg\0.png\0.bmp\0.jpeg\0\0", ".");
+    ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose File", ".jpg\0.png\0.bmp\0.jpeg\0.mp4\0\0", ".");
 }
 
 //  Display image file dialog, place it at the end of menubar function
@@ -136,17 +136,19 @@ void CUI::AddMenuFile()
 {
     //ImGui::MenuItem("(dummy menu)", NULL, false, false);
 
-    if (ImGui::MenuItem("Open", "Ctrl+O")) 
+    if (ImGui::MenuItem("Open")) 
     {
         OpenImageFIleDialog();
 
+    }
+    if (ImGui::MenuItem("Camera"))
+    {
+        Open_Camera();
     }
 
     /*if (ImGui::BeginMenu("Open Recent"))
     {
     }*/
-    if (ImGui::MenuItem("Save", "Ctrl+S")) {}
-    if (ImGui::MenuItem("Save As..")) {}
 }
 
 ImVec2 CUI::Get_window_mouse_pos()
@@ -189,6 +191,7 @@ void CUI::DisplayImage()
                 ImageTool(*cimg_iter);
                 (*flag_iter)[1] = temp_flag;
                 ImGui::Image((void*)(intptr_t)(*cimg_iter).texture(), ImVec2((*cimg_iter).width(), (*cimg_iter).height()));
+                (*cimg_iter).Image_Update();
                 ImGui::End();
             }
             flag_iter++; cimg_iter++;
@@ -214,6 +217,18 @@ void CUI::AddImage(const std::string path, const std::string name)
     }
 
     if (cimg.Load_Image(path, name_))
+    {
+        std::vector<bool> temp_vec = { true,true };
+        CImg_flag_list.push_back(temp_vec);
+
+        CImg_list.push_back(cimg);
+    }
+}
+
+void CUI::Open_Camera()
+{
+    CImage cimg;
+    if (cimg.Load_Image(0))
     {
         std::vector<bool> temp_vec = { true,true };
         CImg_flag_list.push_back(temp_vec);
@@ -252,7 +267,7 @@ void CUI::ImageTool(CImage& cimg)
                     maskrcnn_segment.Load_Model();
                 if (!cimg.is_segment)
                     maskrcnn_segment.Process(cimg.input_img, cimg.output_img, cimg.is_segment);
-                if (maskrcnn_segment.Get_Result(cimg.segment_mask))
+                if (maskrcnn_segment.Get_Result(cimg.segment_mask, cimg.res_boxes))
                     cimg.Set_Display_Output();
             }
             if (ImGui::MenuItem("Pose Estimation"))
@@ -270,9 +285,34 @@ void CUI::ImageTool(CImage& cimg)
 
         if (ImGui::BeginMenu("Setting"))
         {
-            if (ImGui::MenuItem("Set Select Image"))
+            if (cimg.isVideo())
             {
-                cimg.Set_Select();
+                if (cimg.isVideoplay())
+                {
+                    if (ImGui::MenuItem("Stop"))
+                    {
+                        cimg.Switch_Video_mode();
+                    }
+                }
+                else
+                {
+                    if (ImGui::MenuItem("Play"))
+                    {
+                        cimg.Switch_Video_mode();
+                    }
+                }
+            }
+
+            else
+            {
+                if (ImGui::MenuItem("Set Select Image"))
+                {
+                    cimg.Set_Select();
+                }
+                if (ImGui::MenuItem("Remove Background"))
+                {
+                    cimg.Remove_Background();
+                }
             }
 
             ImGui::EndMenu();

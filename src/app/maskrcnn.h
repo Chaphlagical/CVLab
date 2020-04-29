@@ -16,7 +16,7 @@ namespace Chaf
 	public:
 		CMaskRCNN();
 		void Load_Model();
-		bool Get_Result(std::vector<cv::Mat>& mask);
+		bool Get_Result(std::vector<cv::Mat>& mask, std::vector<cv::Rect>& box);
 
 	private:
 		std::vector<std::string> Get_Output_Name();
@@ -29,6 +29,7 @@ namespace Chaf
 	private:
 		std::vector<cv::Scalar> colors_list;
 		std::vector<cv::Mat> mask_list;
+		std::vector<cv::Rect> box_list;
 	};
 
 

@@ -13,11 +13,15 @@ An app based on OpenCV and dear-imgui for computer vision demo of OpenCV
 ## Feature
 
 
+- [x] Image  display and scale
+- [x] Video display and stop
+- [x] Open Camera
 - [x] Yolov3 object detection for images
 - [ ] Yolov3 object detection for videos
 - [ ] Yolov3 object detection for camera flow
 - [x] Mask RCNN for images
 - [x] Open Pose for single human pose estimation
+- [ ] Fake face
 - [ ] Open Pose for multi-human pose estimation
 - [ ] Artistic Style
 - [ ] Tracking

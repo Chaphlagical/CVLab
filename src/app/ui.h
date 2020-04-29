@@ -97,6 +97,8 @@ namespace Chaf
 		std::vector<std::vector<bool>> CImg_flag_list; // 0: hide flag, 1: close flag
 		void DisplayImage();
 		void AddImage(const std::string path, const std::string name);
+		void Open_Camera();
+
 		void ImageTool(CImage& cimg);
 		void ImageMenu();
 
