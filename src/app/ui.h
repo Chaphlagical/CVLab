@@ -66,6 +66,7 @@
 #include "pose.h"
 #include "maskrcnn.h"
 #include <Windows.h>
+#include "style_transfer.h"
 
 namespace Chaf
 {
@@ -116,6 +117,7 @@ namespace Chaf
 		CYolo yolo_detection;
 		CMaskRCNN maskrcnn_segment;
 		CPose open_pose;
+		CST style_transfer;
 
 	private:
 		bool no_titlebar;

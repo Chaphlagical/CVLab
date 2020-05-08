@@ -167,3 +167,9 @@ bool CYolo::Get_Result(std::vector<cv::Rect>& boxes, std::vector<std::string>& c
 	classes = res_classes;
 	return true;
 }
+
+void CYolo::Update(cv::Mat& input, cv::Mat& output)
+{
+	bool temp;
+	Process(input, output, temp);
+}

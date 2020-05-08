@@ -18,6 +18,7 @@ namespace Chaf
 	public:
 		void Load_Model();
 		bool Get_Result(std::vector<cv::Rect>& boxes, std::vector<std::string>& classes);
+		void Update(cv::Mat& input, cv::Mat& output);
 
 	private:
 		std::vector<std::string> Get_Output_Name();

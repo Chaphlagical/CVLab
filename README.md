@@ -17,13 +17,13 @@ An app based on OpenCV and dear-imgui for computer vision demo of OpenCV
 - [x] Video display and stop
 - [x] Open Camera
 - [x] Yolov3 object detection for images
-- [ ] Yolov3 object detection for videos
-- [ ] Yolov3 object detection for camera flow
+- [x] Yolov3 object detection for videos
+- [x] Yolov3 object detection for camera flow
 - [x] Mask RCNN for images
 - [x] Open Pose for single human pose estimation
 - [ ] Fake face
 - [ ] Open Pose for multi-human pose estimation
-- [ ] Artistic Style
+- [x] Style Transfer
 - [ ] Tracking
 - [ ] GAN
 
@@ -56,3 +56,9 @@ Mask-RCNN
 ### Pose Estimation
 
 ![image-20200429134717224](http://home.ustc.edu.cn/~chaf/image/pose.png)
+
+### Style Transfer
+
+Fast Neural Style
+
+![image-20200429134717224](http://home.ustc.edu.cn/~chaf/image/style_transfer.png)

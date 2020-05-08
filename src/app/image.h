@@ -6,6 +6,7 @@
 //#include "glfw/glfw3.h"
 #include "glad/glad.h"
 #include "imgui/imgui.h"
+#include "dnn.h"
 
 namespace Chaf
 {
@@ -45,6 +46,7 @@ namespace Chaf
 		bool is_detected = false;
 		bool is_segment = false;
 		bool is_pose_estimation = false;
+		bool is_style_transfer = false;
 
 	public:
 		int width();

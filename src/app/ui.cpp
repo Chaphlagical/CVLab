@@ -192,6 +192,20 @@ void CUI::DisplayImage()
                 (*flag_iter)[1] = temp_flag;
                 ImGui::Image((void*)(intptr_t)(*cimg_iter).texture(), ImVec2((*cimg_iter).width(), (*cimg_iter).height()));
                 (*cimg_iter).Image_Update();
+                if ((*cimg_iter).isVideo()&&(*cimg_iter).isVideoplay())
+                {
+                    if ((*cimg_iter).is_detected)
+                    {
+                        yolo_detection.Update((*cimg_iter).input_img, (*cimg_iter).output_img);
+                        if (yolo_detection.Get_Result((*cimg_iter).res_boxes, (*cimg_iter).res_classes))
+                            (*cimg_iter).Set_Display_Output();
+                    }
+                    if ((*cimg_iter).is_style_transfer)
+                    {
+                        style_transfer.Update((*cimg_iter).input_img, (*cimg_iter).output_img);
+                        (*cimg_iter).Set_Display_Output();
+                    }
+                }
                 ImGui::End();
             }
             flag_iter++; cimg_iter++;
@@ -278,6 +292,15 @@ void CUI::ImageTool(CImage& cimg)
                     open_pose.Process(cimg.input_img, cimg.output_img, cimg.is_pose_estimation);
                 if (open_pose.Get_Result(cimg.points))
                     cimg.Set_Display_Output();
+            }
+
+            if (ImGui::MenuItem("Style Transfer"))
+            {
+                if (!style_transfer.IsModelLoad())
+                    style_transfer.Load_Model();
+                if (!cimg.is_style_transfer)
+                    style_transfer.Process(cimg.input_img, cimg.output_img, cimg.is_style_transfer);
+                cimg.Set_Display_Output();
             }
 
             ImGui::EndMenu();
@@ -380,12 +403,41 @@ void CUI::ImageMenu()
             open_pose.Load_Model();
     }
 
+    const char* items[] = { "0", "1", "2", "3", "4", "5", "6", "7", "8" };
+    static const char* current_item = NULL;
+
+    if (ImGui::BeginCombo("Select ST model index", current_item)) // The second parameter is the label previewed before opening the combo.
+    {
+        for (int n = 0; n < IM_ARRAYSIZE(items); n++)
+        {
+            bool is_selected = (current_item == items[n]); // You can store your selection however you want, outside or inside your objects
+            if (ImGui::Selectable(items[n], is_selected))
+            {
+                current_item = items[n];
+                style_transfer.Set_Model(current_item[0] - '0');
+            }
+
+            if (is_selected)
+                ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+        }
+        ImGui::EndCombo();
+    }
+   
+
+    if (ImGui::Button("Load Style Transfer Model"))
+    {
+        style_transfer.Load_Model();
+    }
+
+
     if (yolo_detection.IsModelLoad())
         ImGui::Text("Yolo Model Loaded!");
     if (maskrcnn_segment.IsModelLoad())
         ImGui::Text("Mask-RCNN Model Loaded!");
     if (open_pose.IsModelLoad())
         ImGui::Text("Open Pose Model Loaded!");
+    if (style_transfer.IsModelLoad())
+        ImGui::Text("Style Transfer Model Loaded!");
 
     ImGui::End();    
 
