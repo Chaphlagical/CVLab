@@ -406,7 +406,8 @@ void CUI::ImageMenu()
     const char* items[] = { "0", "1", "2", "3", "4", "5", "6", "7", "8" };
     static const char* current_item = NULL;
 
-    if (ImGui::BeginCombo("Select ST model index", current_item)) // The second parameter is the label previewed before opening the combo.
+    ImGui::Text("Select ST model index");
+    if (ImGui::BeginCombo("", current_item)) // The second parameter is the label previewed before opening the combo.
     {
         for (int n = 0; n < IM_ARRAYSIZE(items); n++)
         {
