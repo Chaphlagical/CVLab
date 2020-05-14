@@ -298,8 +298,8 @@ void CUI::ImageTool(CImage& cimg)
             {
                 if (!style_transfer.IsModelLoad())
                     style_transfer.Load_Model();
-                if (!cimg.is_style_transfer)
-                    style_transfer.Process(cimg.input_img, cimg.output_img, cimg.is_style_transfer);
+                
+                style_transfer.Process(cimg.input_img, cimg.output_img, cimg.is_style_transfer);
                 cimg.Set_Display_Output();
             }
 
